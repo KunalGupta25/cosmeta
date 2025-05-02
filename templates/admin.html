@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Cosmeta: Incarnate{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+    </div>
+    
+    <div class="admin-content">
+        <div class="users-table-container">
+            <h2>Manage Users</h2>
+            
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Discord ID</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td class="user-cell">
+                            {% if user.avatar %}
+                                <img src="https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.avatar }}.png" alt="{{ user.username }}" class="user-avatar">
+                            {% else %}
+                                <div class="default-avatar">
+                                    {{ user.username[0]|upper }}
+                                </div>
+                            {% endif %}
+                            <span class="username">{{ user.username }}</span>
+                        </td>
+                        <td>{{ user.discord_id }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('change_user_role', user_id=user.id) }}" class="role-form">
+                                <select name="role" class="role-select" onchange="this.form.submit()">
+                                    <option value="{{ user.ROLE_USER }}" {% if user.role == user.ROLE_USER %}selected{% endif %}>User</option>
+                                    <option value="{{ user.ROLE_SUPPORTER }}" {% if user.role == user.ROLE_SUPPORTER %}selected{% endif %}>Supporter</option>
+                                    <option value="{{ user.ROLE_AUTHOR }}" {% if user.role == user.ROLE_AUTHOR %}selected{% endif %}>Author</option>
+                                    <option value="{{ user.ROLE_ADMIN }}" {% if user.role == user.ROLE_ADMIN %}selected{% endif %}>Admin</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                        <td class="actions-cell">
+                            {% if user.id != current_user.id %}
+                                <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                    <button type="submit" class="action-link delete">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="current-user-badge">You</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="no-users">
+                            <p>No users available.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

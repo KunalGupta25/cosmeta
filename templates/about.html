@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}About - Cosmeta: Incarnate{% endblock %}
+
+{% block content %}
+<section class="about-section">
+    <div class="container">
+        <div class="section-header">
+            <h1>About Cosmeta: Incarnate</h1>
+            <div class="section-divider"></div>
+        </div>
+        
+        <div class="about-content">
+            {% if site_settings and site_settings.about_page_content %}
+                {{ site_settings.about_page_content|safe }}
+            {% else %}
+                <p>Cosmeta: Incarnate is a web novel that explores the boundaries between reality and fiction, delving into themes of identity, consciousness, and the nature of existence.</p>
+                
+                <p>Set in a world where the lines between digital and physical realities have blurred, our story follows characters who discover they may be more—or less—than they appear.</p>
+                
+                <p>This platform allows readers to follow along with new chapters as they're released, with special early access for supporters.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="team-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Meet the Team</h2>
+            <div class="section-divider"></div>
+        </div>
+        
+        <div class="team-grid">
+            {% for member in team_members %}
+            <div class="team-card">
+                <div class="team-photo">
+                    {% if member.photo %}
+                        <img src="{{ url_for('static', filename='uploads/' + member.photo) }}" alt="{{ member.name }}">
+                    {% else %}
+                        <div class="default-photo">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="team-info">
+                    <h3 class="team-name">{{ member.name }}</h3>
+                    <p class="team-role">{{ member.role }}</p>
+                    <div class="team-bio">
+                        <p>{{ member.bio }}</p>
+                    </div>
+                    <div class="team-social">
+                        {% if member.twitter %}
+                            <a href="{{ member.twitter }}" target="_blank" class="social-link twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% if member.discord %}
+                            <a href="{{ member.discord }}" class="social-link discord">
+                                <i class="fab fa-discord"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% if member.instagram %}
+                            <a href="{{ member.instagram }}" target="_blank" class="social-link instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% if member.website %}
+                            <a href="{{ member.website }}" target="_blank" class="social-link website">
+                                <i class="fas fa-globe"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="no-team-members">
+                <p>Team information coming soon!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

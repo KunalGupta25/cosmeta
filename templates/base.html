@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ user_preferences.theme if user_preferences else 'system' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cosmeta: Incarnate{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="alternate" type="application/rss+xml" title="Cosmeta: Incarnate RSS Feed" href="{{ url_for('rss_feed') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <a href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Cosmeta: Incarnate" class="logo">
+            </a>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('chapters') }}">Chapters</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_author or current_user.is_admin %}
+                        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    {% endif %}
+                    {% if current_user.is_admin %}
+                        <li><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+                    {% endif %}
+                    {% if not current_user.is_supporter and not current_user.is_admin and not current_user.is_author %}
+                        <li><a href="{{ url_for('request_supporter') }}">Request Supporter</a></li>
+                    {% endif %}
+                    <li>
+                        <div class="user-info">
+                            <a href="{{ url_for('profile') }}" class="profile-link">
+                                <span class="username">{{ current_user.display_name or current_user.username }}</span>
+                                <span class="role-badge 
+                                    {% if current_user.is_admin %}admin
+                                    {% elif current_user.is_author %}author
+                                    {% elif current_user.is_supporter %}supporter
+                                    {% else %}user{% endif %}">
+                                    {% if current_user.is_admin %}Admin
+                                    {% elif current_user.is_author %}Author
+                                    {% elif current_user.is_supporter %}Supporter
+                                    {% else %}User{% endif %}
+                                </span>
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+                        </div>
+                    </li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}" class="login-btn">Login with Discord</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                        <button class="close-btn">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Cosmeta: Incarnate">
+            </div>
+            <div class="footer-links">
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('about') }}">About</a></li>
+                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                    <li><a href="{{ url_for('rss_feed') }}">RSS Feed</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="social-links">
+                <a href="#" class="social-icon"><i class="fab fa-discord"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                <a href="{{ url_for('rss_feed') }}" class="social-icon"><i class="fas fa-rss"></i></a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; {{ now.year }} Cosmeta: Incarnate. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

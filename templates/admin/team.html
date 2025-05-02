@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Team - Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Manage Team</h1>
+        <div class="section-divider"></div>
+    </div>
+    
+    <div class="admin-content">
+        <div class="admin-sidebar">
+            <div class="admin-nav">
+                <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin_team') }}" class="admin-nav-item active">
+                    <i class="fas fa-users"></i> Team Members
+                </a>
+                <a href="{{ url_for('admin_settings') }}" class="admin-nav-item">
+                    <i class="fas fa-cog"></i> Site Settings
+                </a>
+            </div>
+        </div>
+        
+        <div class="admin-main">
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2>Team Members</h2>
+                    <button class="add-btn" id="add-team-member-btn">
+                        <i class="fas fa-plus"></i> Add Team Member
+                    </button>
+                </div>
+                
+                <div class="team-members-list">
+                    {% if team_members %}
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Photo</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Order</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in team_members %}
+                                <tr>
+                                    <td class="member-photo">
+                                        {% if member.photo %}
+                                            <img src="{{ url_for('static', filename='uploads/' + member.photo) }}" alt="{{ member.name }}">
+                                        {% else %}
+                                            <div class="default-photo">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ member.name }}</td>
+                                    <td>{{ member.role }}</td>
+                                    <td>{{ member.order }}</td>
+                                    <td class="actions">
+                                        <button class="edit-btn" data-id="{{ member.id }}" data-name="{{ member.name }}" data-role="{{ member.role }}" data-bio="{{ member.bio }}" data-user-id="{{ member.user_id or '' }}" data-twitter="{{ member.twitter or '' }}" data-discord="{{ member.discord or '' }}" data-instagram="{{ member.instagram or '' }}" data-website="{{ member.website or '' }}" data-order="{{ member.order }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="delete-btn" data-id="{{ member.id }}" data-name="{{ member.name }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="no-items">
+                            <p>No team members added yet. Click the "Add Team Member" button to add one.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Team Member Modal -->
+<div class="modal" id="add-team-member-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add Team Member</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form method="POST" action="{{ url_for('admin_team') }}" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="add">
+                
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <input type="text" id="role" name="role" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea id="bio" name="bio" class="form-control" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user_id">Associated User (Optional)</label>
+                    <select id="user_id" name="user_id" class="form-control">
+                        <option value="">None</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="photo">Photo</label>
+                    <input type="file" id="photo" name="photo" class="form-control">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="twitter">Twitter URL</label>
+                        <input type="url" id="twitter" name="twitter" class="form-control">
+                    </div>
+                    
+                    <div class="form-group half">
+                        <label for="discord">Discord Username</label>
+                        <input type="text" id="discord" name="discord" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="instagram">Instagram URL</label>
+                        <input type="url" id="instagram" name="instagram" class="form-control">
+                    </div>
+                    
+                    <div class="form-group half">
+                        <label for="website">Website URL</label>
+                        <input type="url" id="website" name="website" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="order">Display Order</label>
+                    <input type="number" id="order" name="order" class="form-control" value="0" min="0">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i> Save Team Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Team Member Modal -->
+<div class="modal" id="edit-team-member-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Team Member</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form method="POST" action="{{ url_for('admin_team') }}" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="member_id" id="edit-member-id">
+                
+                <div class="form-group">
+                    <label for="edit-name">Name</label>
+                    <input type="text" id="edit-name" name="name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-role">Role</label>
+                    <input type="text" id="edit-role" name="role" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-bio">Bio</label>
+                    <textarea id="edit-bio" name="bio" class="form-control" rows="4"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-user-id">Associated User (Optional)</label>
+                    <select id="edit-user-id" name="user_id" class="form-control">
+                        <option value="">None</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-photo">Photo (Leave empty to keep current)</label>
+                    <input type="file" id="edit-photo" name="photo" class="form-control">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="edit-twitter">Twitter URL</label>
+                        <input type="url" id="edit-twitter" name="twitter" class="form-control">
+                    </div>
+                    
+                    <div class="form-group half">
+                        <label for="edit-discord">Discord Username</label>
+                        <input type="text" id="edit-discord" name="discord" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="edit-instagram">Instagram URL</label>
+                        <input type="url" id="edit-instagram" name="instagram" class="form-control">
+                    </div>
+                    
+                    <div class="form-group half">
+                        <label for="edit-website">Website URL</label>
+                        <input type="url" id="edit-website" name="website" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-order">Display Order</label>
+                    <input type="number" id="edit-order" name="order" class="form-control" min="0">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i> Update Team Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Team Member Modal -->
+<div class="modal" id="delete-team-member-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Delete Team Member</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <span id="delete-member-name"></span>? This action cannot be undone.</p>
+            
+            <form method="POST" action="{{ url_for('admin_team') }}">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="member_id" id="delete-member-id">
+                
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn close-modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="delete-confirm-btn">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add Team Member Modal
+        const addModal = document.getElementById('add-team-member-modal');
+        const addBtn = document.getElementById('add-team-member-btn');
+        const addClose = addModal.querySelector('.close');
+        
+        addBtn.addEventListener('click', function() {
+            addModal.style.display = 'block';
+        });
+        
+        addClose.addEventListener('click', function() {
+            addModal.style.display = 'none';
+        });
+        
+        // Edit Team Member Modal
+        const editModal = document.getElementById('edit-team-member-modal');
+        const editBtns = document.querySelectorAll('.edit-btn');
+        const editClose = editModal.querySelector('.close');
+        
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                const role = this.getAttribute('data-role');
+                const bio = this.getAttribute('data-bio');
+                const userId = this.getAttribute('data-user-id');
+                const twitter = this.getAttribute('data-twitter');
+                const discord = this.getAttribute('data-discord');
+                const instagram = this.getAttribute('data-instagram');
+                const website = this.getAttribute('data-website');
+                const order = this.getAttribute('data-order');
+                
+                document.getElementById('edit-member-id').value = id;
+                document.getElementById('edit-name').value = name;
+                document.getElementById('edit-role').value = role;
+                document.getElementById('edit-bio').value = bio;
+                document.getElementById('edit-user-id').value = userId;
+                document.getElementById('edit-twitter').value = twitter;
+                document.getElementById('edit-discord').value = discord;
+                document.getElementById('edit-instagram').value = instagram;
+                document.getElementById('edit-website').value = website;
+                document.getElementById('edit-order').value = order;
+                
+                editModal.style.display = 'block';
+            });
+        });
+        
+        editClose.addEventListener('click', function() {
+            editModal.style.display = 'none';
+        });
+        
+        // Delete Team Member Modal
+        const deleteModal = document.getElementById('delete-team-member-modal');
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        const deleteClose = deleteModal.querySelector('.close');
+        const cancelBtn = deleteModal.querySelector('.cancel-btn');
+        
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                
+                document.getElementById('delete-member-id').value = id;
+                document.getElementById('delete-member-name').textContent = name;
+                
+                deleteModal.style.display = 'block';
+            });
+        });
+        
+        deleteClose.addEventListener('click', function() {
+            deleteModal.style.display = 'none';
+        });
+        
+        cancelBtn.addEventListener('click', function() {
+            deleteModal.style.display = 'none';
+        });
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === addModal) {
+                addModal.style.display = 'none';
+            }
+            if (event.target === editModal) {
+                editModal.style.display = 'none';
+            }
+            if (event.target === deleteModal) {
+                deleteModal.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

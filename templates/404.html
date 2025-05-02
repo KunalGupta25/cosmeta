@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - Cosmeta: Incarnate{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <h1 class="error-code">404</h1>
+        <h2 class="error-title">Page Not Found</h2>
+        <p class="error-message">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+        <a href="{{ url_for('index') }}" class="return-home">
+            <i class="fas fa-home"></i> Return to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

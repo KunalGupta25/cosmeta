@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}All Chapters - Cosmeta: Incarnate{% endblock %}
+
+{% block content %}
+<section class="all-chapters">
+    <div class="section-header">
+        <h1>All Chapters</h1>
+        <div class="section-divider"></div>
+    </div>
+    
+    <div class="chapters-container">
+        {% for chapter in chapters %}
+        <div class="chapter-item">
+            <div class="chapter-item-image">
+                {% if chapter.cover_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + chapter.cover_image) }}" alt="{{ chapter.title }}">
+                {% else %}
+                    <div class="default-cover">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="chapter-item-info">
+                <h3 class="chapter-item-title">{{ chapter.title }}</h3>
+                <p class="chapter-item-meta">Chapter {{ chapter.sequence }} • {{ chapter.created_at.strftime('%b %d, %Y') }}</p>
+                
+                {% if chapter.created_at > now - timedelta(hours=24) and not current_user.is_authenticated %}
+                    <div class="chapter-item-badge">
+                        <i class="fas fa-lock"></i> Login to Read
+                    </div>
+                {% elif chapter.created_at > now - timedelta(hours=24) and not current_user.is_supporter %}
+                    <div class="chapter-item-badge supporter">
+                        <i class="fas fa-crown"></i> Supporter Only
+                    </div>
+                {% endif %}
+                
+                <a href="{{ url_for('chapter', chapter_id=chapter.id) }}" class="read-button">
+                    {% if not current_user.is_authenticated %}
+                        <i class="fas fa-sign-in-alt"></i> Login to Read
+                    {% elif chapter.created_at > now - timedelta(hours=24) and not current_user.is_supporter %}
+                        <i class="fas fa-lock"></i> Supporter Only
+                    {% else %}
+                        <i class="fas fa-book-reader"></i> Read Now
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-chapters">
+            <p>No chapters available yet. Check back soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

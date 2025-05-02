@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Cosmeta: Incarnate{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <h1 class="error-code">500</h1>
+        <h2 class="error-title">Server Error</h2>
+        <p class="error-message">Something went wrong on our end. Please try again later or contact support if the problem persists.</p>
+        <a href="{{ url_for('index') }}" class="return-home">
+            <i class="fas fa-home"></i> Return to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

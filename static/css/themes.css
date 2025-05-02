@@ -1,0 +1,375 @@
+/* Theme Variables */
+
+/* Dark Theme (Default) */
+:root {
+    --primary-color: #6a1b9a; /* Deep Purple */
+    --secondary-color: #d4af37; /* Gold */
+    --accent-color: #c62828; /* Red */
+    --dark-color: #121212; /* Almost Black */
+    --light-color: #f5f5f5;
+    --text-color: #e0e0e0;
+    --bg-color: #121212;
+    --card-bg-color: rgba(30, 30, 30, 0.7);
+    --card-hover-bg-color: rgba(40, 40, 40, 0.8);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --input-bg-color: #1e1e1e;
+    --input-border-color: #333;
+    --header-bg-color: rgba(18, 18, 18, 0.95);
+    --footer-bg-color: rgba(18, 18, 18, 0.95);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --glow-effect: 0 0 10px rgba(106, 27, 154, 0.5);
+}
+
+/* Light Theme */
+html[data-theme="light"] {
+    --primary-color: #6a1b9a; /* Keep the same */
+    --secondary-color: #d4af37; /* Keep the same */
+    --accent-color: #c62828; /* Keep the same */
+    --dark-color: #f5f5f5; /* Inverted */
+    --light-color: #121212; /* Inverted */
+    --text-color: #333333; /* Darker text for light mode */
+    --bg-color: #f5f5f5;
+    --card-bg-color: rgba(255, 255, 255, 0.9);
+    --card-hover-bg-color: rgba(245, 245, 245, 0.95);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --input-bg-color: #ffffff;
+    --input-border-color: #dddddd;
+    --header-bg-color: rgba(255, 255, 255, 0.95);
+    --footer-bg-color: rgba(255, 255, 255, 0.95);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    /* Keep the same border-radius and effects */
+}
+
+/* System Theme - Apply based on user's system preference */
+@media (prefers-color-scheme: light) {
+    html[data-theme="system"] {
+        --primary-color: #6a1b9a;
+        --secondary-color: #d4af37;
+        --accent-color: #c62828;
+        --dark-color: #f5f5f5;
+        --light-color: #121212;
+        --text-color: #333333;
+        --bg-color: #f5f5f5;
+        --card-bg-color: rgba(255, 255, 255, 0.9);
+        --card-hover-bg-color: rgba(245, 245, 245, 0.95);
+        --border-color: rgba(0, 0, 0, 0.1);
+        --input-bg-color: #ffffff;
+        --input-border-color: #dddddd;
+        --header-bg-color: rgba(255, 255, 255, 0.95);
+        --footer-bg-color: rgba(255, 255, 255, 0.95);
+        --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Apply theme variables to elements */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+header {
+    background-color: var(--header-bg-color);
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+footer {
+    background-color: var(--footer-bg-color);
+    box-shadow: 0 -2px 10px var(--shadow-color);
+}
+
+.nav-links a {
+    color: var(--text-color);
+}
+
+.chapter-card, .chapter-item, .profile-card, .profile-nav, .profile-section {
+    background-color: var(--card-bg-color);
+    box-shadow: var(--box-shadow);
+}
+
+.chapter-card:hover, .chapter-item:hover {
+    background-color: var(--card-hover-bg-color);
+}
+
+.form-control {
+    background-color: var(--input-bg-color);
+    border-color: var(--input-border-color);
+    color: var(--text-color);
+}
+
+/* Fix for buttons in light mode - always keep text white */
+.btn, button[type="submit"], .submit-btn, .action-btn, .cta-btn,
+.cta-button, .read-button, .view-all-button, .discord-button, .nav-button, 
+.file-input-button, .submit-button, .action-button, .icon-button {
+    color: white !important;
+}
+
+/* Fix for feature cards in light mode */
+html[data-theme="light"] .feature-card,
+html[data-theme="system"].light-mode .feature-card {
+    background-color: rgba(30, 30, 30, 0.7) !important;
+}
+
+html[data-theme="light"] .feature-card h3,
+html[data-theme="system"].light-mode .feature-card h3 {
+    color: white !important;
+}
+
+html[data-theme="light"] .feature-card p,
+html[data-theme="system"].light-mode .feature-card p {
+    color: white !important;
+}
+
+html[data-theme="light"] .feature-card .feature-icon i,
+html[data-theme="system"].light-mode .feature-card .feature-icon i {
+    color: var(--secondary-color) !important;
+}
+
+/* Keep footer and social icons the same in all modes */
+footer {
+    background-color: rgba(18, 18, 18, 0.95) !important;
+}
+
+.social-icon {
+    color: #f5f5f5 !important;
+    background-color: #333 !important;
+}
+
+.social-icon:hover {
+    background-color: var(--primary-color) !important;
+    color: #f5f5f5 !important;
+}
+
+/* Ensure text is white on gradient or dark backgrounds in light mode */
+html[data-theme="light"] .default-avatar,
+html[data-theme="system"].light-mode .default-avatar,
+html[data-theme="light"] .default-cover,
+html[data-theme="system"].light-mode .default-cover,
+html[data-theme="light"] [style*="background: linear-gradient"],
+html[data-theme="system"].light-mode [style*="background: linear-gradient"],
+html[data-theme="light"] [style*="background-color: rgba(30, 30, 30"],
+html[data-theme="system"].light-mode [style*="background-color: rgba(30, 30, 30"] {
+    color: white !important;
+}
+
+/* Keep default avatar gradient in light mode */
+html[data-theme="light"] .default-avatar,
+html[data-theme="system"].light-mode .default-avatar {
+    background: linear-gradient(135deg, var(--primary-color), #4a148c) !important;
+}
+
+/* Ensure text is white in hero and CTA sections in light mode */
+html[data-theme="light"] .hero-title,
+html[data-theme="system"].light-mode .hero-title,
+html[data-theme="light"] .hero-subtitle,
+html[data-theme="system"].light-mode .hero-subtitle,
+html[data-theme="light"] .cta-content h2,
+html[data-theme="system"].light-mode .cta-content h2,
+html[data-theme="light"] .cta-content p,
+html[data-theme="system"].light-mode .cta-content p {
+    color: white !important;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Ensure profile navigation has white text in light mode */
+html[data-theme="light"] .profile-nav-item,
+html[data-theme="system"].light-mode .profile-nav-item,
+html[data-theme="light"] .profile-nav-item i,
+html[data-theme="system"].light-mode .profile-nav-item i,
+html[data-theme="light"] .profile-section,
+html[data-theme="system"].light-mode .profile-section,
+html[data-theme="light"] .profile-section h2,
+html[data-theme="system"].light-mode .profile-section h2,
+html[data-theme="light"] .profile-section h3,
+html[data-theme="system"].light-mode .profile-section h3,
+html[data-theme="light"] .profile-section label,
+html[data-theme="system"].light-mode .profile-section label {
+    color: white !important;
+}
+
+/* Make profile nav active item stand out in light mode */
+html[data-theme="light"] .profile-nav-item.active,
+html[data-theme="system"].light-mode .profile-nav-item.active {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Keep original dark backgrounds but ensure text is white in light mode */
+html[data-theme="light"] .chapter-card,
+html[data-theme="system"].light-mode .chapter-card,
+html[data-theme="light"] .chapter-item,
+html[data-theme="system"].light-mode .chapter-item,
+html[data-theme="light"] .chapter-progress-item,
+html[data-theme="system"].light-mode .chapter-progress-item,
+html[data-theme="light"] .last-read-card,
+html[data-theme="system"].light-mode .last-read-card,
+html[data-theme="light"] .feed-description,
+html[data-theme="system"].light-mode .feed-description,
+html[data-theme="light"] .feed-chapters .chapter-item,
+html[data-theme="system"].light-mode .feed-chapters .chapter-item,
+html[data-theme="light"] .feed-readers,
+html[data-theme="system"].light-mode .feed-readers {
+    background-color: rgba(30, 30, 30, 0.7) !important;
+}
+
+html[data-theme="light"] .chapter-card h3,
+html[data-theme="system"].light-mode .chapter-card h3,
+html[data-theme="light"] .chapter-card p,
+html[data-theme="system"].light-mode .chapter-card p,
+html[data-theme="light"] .chapter-card .chapter-meta,
+html[data-theme="system"].light-mode .chapter-card .chapter-meta,
+html[data-theme="light"] .chapter-card .chapter-title,
+html[data-theme="system"].light-mode .chapter-card .chapter-title,
+html[data-theme="light"] .chapter-item h3,
+html[data-theme="system"].light-mode .chapter-item h3,
+html[data-theme="light"] .chapter-progress-item h4,
+html[data-theme="system"].light-mode .chapter-progress-item h4,
+html[data-theme="light"] .chapter-progress-item p,
+html[data-theme="system"].light-mode .chapter-progress-item p,
+html[data-theme="light"] .chapter-progress-item span,
+html[data-theme="system"].light-mode .chapter-progress-item span,
+html[data-theme="light"] .last-read-info h3,
+html[data-theme="system"].light-mode .last-read-info h3,
+html[data-theme="light"] .last-read-info h4,
+html[data-theme="system"].light-mode .last-read-info h4,
+html[data-theme="light"] .last-read-info p,
+html[data-theme="system"].light-mode .last-read-info p,
+html[data-theme="light"] .feed-description p,
+html[data-theme="system"].light-mode .feed-description p,
+html[data-theme="light"] .feed-chapters .chapter-item h3,
+html[data-theme="system"].light-mode .feed-chapters .chapter-item h3,
+html[data-theme="light"] .feed-chapters .chapter-item .chapter-preview,
+html[data-theme="system"].light-mode .feed-chapters .chapter-item .chapter-preview,
+html[data-theme="light"] .feed-readers h2,
+html[data-theme="system"].light-mode .feed-readers h2 {
+    color: white !important;
+}
+
+/* Ensure form elements in dark backgrounds have proper styling in light mode */
+html[data-theme="light"] .form-control,
+html[data-theme="system"].light-mode .form-control {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+html[data-theme="light"] .form-control:focus,
+html[data-theme="system"].light-mode .form-control:focus {
+    border-color: var(--secondary-color) !important;
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25) !important;
+}
+
+html[data-theme="light"] .form-help-text,
+html[data-theme="system"].light-mode .form-help-text {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Keep role badges consistent in all themes */
+.role-badge, .profile-role-badge {
+    color: white !important;
+}
+
+.role-badge.supporter, .profile-role-badge.supporter {
+    color: var(--dark-color) !important;
+}
+
+/* Profile card in light mode - keep original dark background */
+html[data-theme="light"] .profile-card,
+html[data-theme="system"].light-mode .profile-card,
+html[data-theme="light"] .profile-section,
+html[data-theme="system"].light-mode .profile-section,
+html[data-theme="light"] .profile-nav,
+html[data-theme="system"].light-mode .profile-nav {
+    background-color: rgba(30, 30, 30, 0.7);
+}
+
+html[data-theme="light"] .profile-card .profile-name,
+html[data-theme="system"].light-mode .profile-card .profile-name,
+html[data-theme="light"] .profile-card .stat-value,
+html[data-theme="system"].light-mode .profile-card .stat-value,
+html[data-theme="light"] .profile-card .stat-label,
+html[data-theme="system"].light-mode .profile-card .stat-label,
+html[data-theme="light"] .profile-card p,
+html[data-theme="system"].light-mode .profile-card p,
+html[data-theme="light"] .profile-card h2,
+html[data-theme="system"].light-mode .profile-card h2,
+html[data-theme="light"] .profile-card h3,
+html[data-theme="system"].light-mode .profile-card h3,
+html[data-theme="light"] .profile-card span,
+html[data-theme="system"].light-mode .profile-card span {
+    color: white !important;
+}
+
+/* Adjust text colors for better contrast in light mode */
+html[data-theme="light"] .nav-links a:hover,
+html[data-theme="system"].light-mode .nav-links a:hover {
+    color: var(--primary-color);
+}
+
+html[data-theme="light"] .section-title,
+html[data-theme="system"].light-mode .section-title {
+    color: var(--primary-color);
+}
+
+/* Override chapter-title and chapter-meta only when not in cards */
+html[data-theme="light"] .chapter-content .chapter-title,
+html[data-theme="system"].light-mode .chapter-content .chapter-title {
+    color: var(--primary-color);
+}
+
+html[data-theme="light"] .chapter-content .chapter-meta,
+html[data-theme="system"].light-mode .chapter-content .chapter-meta {
+    color: #666;
+}
+
+/* Keep footer links and copyright consistent in all themes */
+html[data-theme="light"] .footer-links a,
+html[data-theme="system"].light-mode .footer-links a,
+html[data-theme="light"] .copyright,
+html[data-theme="system"].light-mode .copyright {
+    color: #bdbdbd !important;
+}
+
+html[data-theme="light"] .footer-links a:hover,
+html[data-theme="system"].light-mode .footer-links a:hover {
+    color: var(--secondary-color) !important;
+}
+
+/* Theme toggle button styles */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(106, 27, 154, 0.2);
+    color: var(--secondary-color);
+}
+
+/* Theme icons */
+.theme-toggle .fa-sun {
+    display: none;
+}
+
+.theme-toggle .fa-moon {
+    display: inline-block;
+}
+
+html[data-theme="light"] .theme-toggle .fa-sun,
+html[data-theme="system"].light-mode .theme-toggle .fa-sun {
+    display: inline-block;
+}
+
+html[data-theme="light"] .theme-toggle .fa-moon,
+html[data-theme="system"].light-mode .theme-toggle .fa-moon {
+    display: none;
+}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter.title }} - Cosmeta: Incarnate{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chapter.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="chapter-container">
+    <div class="chapter-header">
+        <h1 class="chapter-title">{{ chapter.title }}</h1>
+        <div class="chapter-meta">
+            <span class="chapter-number">Chapter {{ chapter.sequence }}</span>
+            <span class="chapter-date">Published on {{ chapter.created_at.strftime('%B %d, %Y') }}</span>
+        </div>
+    </div>
+    
+    <div class="chapter-navigation">
+        {% if prev_chapter %}
+            <a href="{{ url_for('chapter', chapter_id=prev_chapter.id) }}" class="nav-button prev">
+                <i class="fas fa-chevron-left"></i> Previous Chapter
+            </a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="nav-button home">
+                <i class="fas fa-home"></i> Home
+            </a>
+        {% endif %}
+        
+        {% if next_chapter %}
+            <a href="{{ url_for('chapter', chapter_id=next_chapter.id) }}" class="nav-button next">
+                Next Chapter <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="nav-button home">
+                <i class="fas fa-home"></i> Home
+            </a>
+        {% endif %}
+    </div>
+    
+    <div class="chapter-content">
+        {{ chapter.content|safe }}
+    </div>
+    
+    <div class="chapter-navigation bottom">
+        {% if prev_chapter %}
+            <a href="{{ url_for('chapter', chapter_id=prev_chapter.id) }}" class="nav-button prev">
+                <i class="fas fa-chevron-left"></i> Previous Chapter
+            </a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="nav-button home">
+                <i class="fas fa-home"></i> Home
+            </a>
+        {% endif %}
+        
+        {% if next_chapter %}
+            <a href="{{ url_for('chapter', chapter_id=next_chapter.id) }}" class="nav-button next">
+                Next Chapter <i class="fas fa-chevron-right"></i>
+            </a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="nav-button home">
+                <i class="fas fa-home"></i> Home
+            </a>
+        {% endif %}
+    </div>
+    
+    <div class="comments-section">
+        <h3 class="comments-title">Comments</h3>
+        
+        <div class="comment-form">
+            <form method="POST" action="{{ url_for('add_comment', chapter_id=chapter.id) }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.content.label }}
+                    {{ form.content(class="form-control", rows=3) }}
+                    {% if form.content.errors %}
+                        <div class="form-errors">
+                            {% for error in form.content.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="form-actions">
+                    {{ form.submit(class="submit-button") }}
+                </div>
+            </form>
+        </div>
+        
+        <div class="comments-list">
+            {% for comment in comments %}
+                <div class="comment">
+                    <div class="comment-header">
+                        <div class="comment-user">
+                            {% if comment.user.avatar %}
+                                <img src="https://cdn.discordapp.com/avatars/{{ comment.user.discord_id }}/{{ comment.user.avatar }}.png" alt="{{ comment.user.username }}" class="user-avatar">
+                            {% else %}
+                                <div class="default-avatar">
+                                    {{ comment.user.username[0]|upper }}
+                                </div>
+                            {% endif %}
+                            <span class="username">{{ comment.user.username }}</span>
+                            <span class="role-badge 
+                                {% if comment.user.is_admin %}admin
+                                {% elif comment.user.is_author %}author
+                                {% elif comment.user.is_supporter %}supporter
+                                {% else %}user{% endif %}">
+                                {% if comment.user.is_admin %}Admin
+                                {% elif comment.user.is_author %}Author
+                                {% elif comment.user.is_supporter %}Supporter
+                                {% else %}User{% endif %}
+                            </span>
+                        </div>
+                        <span class="comment-date">{{ comment.created_at.strftime('%b %d, %Y %H:%M') }}</span>
+                    </div>
+                    <div class="comment-content">
+                        {{ comment.content }}
+                    </div>
+                </div>
+            {% else %}
+                <div class="no-comments">
+                    <p>No comments yet. Be the first to share your thoughts!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

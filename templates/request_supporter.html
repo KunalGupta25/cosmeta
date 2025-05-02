@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Request Supporter Role{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Request Supporter Role</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead">
+                        If you are a supporter on our Discord server, you can request the Supporter role here.
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <h5>Instructions:</h5>
+                        <ol>
+                            <li>Make sure you have the Supporter role in our Discord server</li>
+                            <li>Enter your Discord username (including the # and numbers)</li>
+                            <li>Click "Request Supporter Role"</li>
+                            <li>An admin will verify your status and grant you the role</li>
+                        </ol>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="form-group mb-3">
+                            <label for="discord_username">Your Discord Username (e.g., Username#1234)</label>
+                            <input type="text" class="form-control" id="discord_username" name="discord_username" 
+                                   value="{{ current_user.username }}" required>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="message">Message (optional)</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" 
+                                      placeholder="Any additional information you'd like to provide..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Request Supporter Role</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

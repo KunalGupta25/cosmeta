@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Cosmeta: Incarnate - Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Cosmeta: Incarnate</h1>
+        <p class="hero-subtitle">Embark on a journey through realms of magic and mystery</p>
+        {% if current_user.is_authenticated %}
+            {% if current_user.reading_progress %}
+                <a href="{{ url_for('chapter', chapter_id=current_user.reading_progress[-1].chapter_id) }}" class="cta-button">Continue Reading</a>
+            {% else %}
+                <a href="{{ url_for('chapter', chapter_id=1) }}" class="cta-button">Start Reading</a>
+            {% endif %}
+        {% else %}
+            <a href="{{ url_for('login') }}" class="cta-button">Sign in to Read</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="latest-chapters">
+    <div class="section-header">
+        <h2>Latest Chapters</h2>
+        <div class="section-divider"></div>
+    </div>
+    
+    <div class="chapter-grid">
+        {% for chapter in latest_chapters %}
+        <div class="chapter-card">
+            <div class="chapter-image">
+                {% if chapter.cover_image %}
+                    <img src="{{ url_for('static', filename='uploads/' + chapter.cover_image) }}" alt="{{ chapter.title }}">
+                {% else %}
+                    <div class="default-cover">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                {% endif %}
+                
+                {% if chapter.created_at > now - timedelta(hours=24) and not current_user.is_supporter %}
+                    <div class="supporter-badge">
+                        <i class="fas fa-crown"></i>
+                        <span>Supporter</span>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="chapter-info">
+                <h3 class="chapter-title">{{ chapter.title }}</h3>
+                <p class="chapter-meta">Chapter {{ chapter.sequence }} • {{ chapter.created_at.strftime('%b %d, %Y') }}</p>
+                <a href="{{ url_for('chapter', chapter_id=chapter.id) }}" class="read-button">
+                    {% if chapter.created_at > now - timedelta(hours=24) and not current_user.is_supporter %}
+                        <i class="fas fa-lock"></i> Supporter Only
+                    {% else %}
+                        <i class="fas fa-book-reader"></i> Read Now
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-chapters">
+            <p>No chapters available yet. Check back soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="view-all-container">
+        <a href="{{ url_for('chapters') }}" class="view-all-button">
+            <i class="fas fa-book"></i> View All Chapters
+        </a>
+    </div>
+</section>
+
+<section class="features">
+    <div class="section-header">
+        <h2>Features</h2>
+        <div class="section-divider"></div>
+    </div>
+    
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <h3>Immersive Reading</h3>
+            <p>Enjoy a clean, distraction-free reading experience designed for fantasy novels.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h3>Supporter Benefits</h3>
+            <p>Get early access to new chapters and exclusive content by becoming a supporter.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h3>Community</h3>
+            <p>Discuss chapters with other readers and share your thoughts with the author.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-bookmark"></i>
+            </div>
+            <h3>Progress Tracking</h3>
+            <p>Your reading progress is automatically saved, so you can always pick up where you left off.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Join Our Discord Community</h2>
+        <p>Connect with other readers, get notified about new chapters, and unlock supporter benefits.</p>
+        <a href="#" class="discord-button">
+            <i class="fab fa-discord"></i> Join Discord
+        </a>
+    </div>
+</section>
+{% endblock %}
