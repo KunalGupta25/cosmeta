@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, redirect, url_for, flash, request, session, Response, make_response
+from flask import Flask, render_template, redirect, url_for, flash, request, session, Response, make_response, send_from_directory
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -120,6 +120,11 @@ def inject_user_preferences():
     return {'user_preferences': None}
 
 # Routes
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static', 'images'),
+                               'logo.png', mimetype='image/png')
+
 @app.route('/')
 def index():
     # Get latest chapters (only 3)
