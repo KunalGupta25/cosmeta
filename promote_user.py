@@ -9,6 +9,11 @@ load_dotenv()
 def main():
     # Connect to the database using environment variables
     conn_string = os.getenv('DATABASE_URL')
+    
+    # Ensure the connection string uses postgresql:// instead of postgres://
+    if conn_string and conn_string.startswith('postgres://'):
+        conn_string = conn_string.replace('postgres://', 'postgresql://', 1)
+    
     conn = psycopg2.connect(conn_string)
     cur = conn.cursor()
     

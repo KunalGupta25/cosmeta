@@ -24,6 +24,11 @@ try:
     import psycopg2
     # Get the connection string from environment variables
     conn_string = os.getenv('DATABASE_URL')
+    
+    # Ensure the connection string uses postgresql:// instead of postgres://
+    if conn_string and conn_string.startswith('postgres://'):
+        conn_string = conn_string.replace('postgres://', 'postgresql://', 1)
+    
     # Test the connection
     conn = psycopg2.connect(conn_string)
     conn.close()
