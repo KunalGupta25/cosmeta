@@ -197,7 +197,7 @@ main {
 /* Hero Section */
 .hero {
     background: linear-gradient(rgba(18, 18, 18, 0.542), rgba(18, 18, 18, 0.362)), 
-                url('../images/starry sky from another planet.png') no-repeat center center/cover;
+                url('../images/starry-sky-from-another-planet.png') no-repeat center center/cover;
     height: 500px;
     display: flex;
     justify-content: center;
@@ -555,7 +555,7 @@ main {
 .cta-section {
     padding: 4rem 2rem;
     background: linear-gradient(rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.7)), 
-                url('../images/man below tree.png') no-repeat center center/cover;
+                url('../images/man-below-tree.png') no-repeat center center/cover;
     text-align: center;
 }
 
