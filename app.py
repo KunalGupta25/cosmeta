@@ -581,6 +581,77 @@ def admin_team():
     
     return render_template('admin/team.html', team_members=team_members, users=users)
 
+@app.route('/admin/check-default-cover')
+def check_default_cover():
+    # Check if the default cover image exists
+    default_cover_path = os.path.join(app.config['UPLOAD_FOLDER'], app.config['DEFAULT_COVER_IMAGE'])
+    exists = os.path.exists(default_cover_path)
+    
+    # Get file info
+    file_info = {}
+    if exists:
+        file_info['size'] = os.path.getsize(default_cover_path)
+        file_info['modified'] = datetime.fromtimestamp(os.path.getmtime(default_cover_path)).strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Check if the uploads directory is writable
+    uploads_writable = os.access(app.config['UPLOAD_FOLDER'], os.W_OK)
+    
+    # Get environment info
+    env_info = {
+        'READ_ONLY_ENV': app.config['READ_ONLY_ENV'],
+        'UPLOAD_FOLDER': app.config['UPLOAD_FOLDER'],
+        'DEFAULT_COVER_IMAGE': app.config['DEFAULT_COVER_IMAGE']
+    }
+    
+    # Format the response
+    response = f"""
+    <h1>Default Cover Image Status</h1>
+    <p><strong>Path:</strong> {default_cover_path}</p>
+    <p><strong>Exists:</strong> {exists}</p>
+    
+    <h2>File Information</h2>
+    {f"<p><strong>Size:</strong> {file_info['size']} bytes</p>" if exists else ""}
+    {f"<p><strong>Last Modified:</strong> {file_info['modified']}</p>" if exists else ""}
+    
+    <h2>Environment Information</h2>
+    <p><strong>Read-Only Environment:</strong> {env_info['READ_ONLY_ENV']}</p>
+    <p><strong>Upload Folder:</strong> {env_info['UPLOAD_FOLDER']}</p>
+    <p><strong>Default Cover Image:</strong> {env_info['DEFAULT_COVER_IMAGE']}</p>
+    <p><strong>Upload Folder Writable:</strong> {uploads_writable}</p>
+    
+    <h2>Image Preview</h2>
+    {f'<img src="/static/uploads/{app.config["DEFAULT_COVER_IMAGE"]}" alt="Default Cover Image" style="max-width: 300px; border: 1px solid #ccc;">' if exists else "<p>Image not found</p>"}
+    """
+    
+    return response
+
+@app.route('/admin/fix-covers')
+@admin_required
+def fix_covers():
+    # First, check if the default cover image exists
+    default_cover_path = os.path.join(app.config['UPLOAD_FOLDER'], app.config['DEFAULT_COVER_IMAGE'])
+    if not os.path.exists(default_cover_path):
+        return f"Error: Default cover image not found at {default_cover_path}. Please make sure it exists."
+    
+    # Get all chapters without a cover image or with invalid cover images
+    chapters_to_fix = Chapter.query.filter(
+        (Chapter.cover_image == None) | 
+        (Chapter.cover_image == '')
+    ).all()
+    
+    # Count of chapters fixed
+    fixed_count = 0
+    
+    # Update each chapter to use the default cover image
+    for chapter in chapters_to_fix:
+        chapter.cover_image = app.config['DEFAULT_COVER_IMAGE']
+        fixed_count += 1
+    
+    # Commit the changes
+    db.session.commit()
+    
+    return f"Fixed {fixed_count} chapters to use the default cover image. Default image path: {default_cover_path}"
+
 @app.route('/admin/settings', methods=['GET', 'POST'])
 @admin_required
 def admin_settings():
