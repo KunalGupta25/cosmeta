@@ -989,8 +989,12 @@ def rss_feed_xml():
         # Get the latest chapters
         chapters = Chapter.query.order_by(Chapter.created_at.desc()).limit(20).all()
         
-        # Create a simple RSS feed without complex namespaces
-        rss = ET.Element('rss', {'version': '2.0'})
+        # Create RSS feed with media namespace for images
+        rss = ET.Element('rss', {
+            'version': '2.0',
+            'xmlns:media': 'http://search.yahoo.com/mrss/',
+            'xmlns:atom': 'http://www.w3.org/2005/Atom'
+        })
         channel = ET.SubElement(rss, 'channel')
         
         # Add channel information
@@ -1022,13 +1026,53 @@ def rss_feed_xml():
             item_pubDate = ET.SubElement(item, 'pubDate')
             item_pubDate.text = chapter.created_at.strftime('%a, %d %b %Y %H:%M:%S GMT')
             
-            # Add description
+            # Add cover image if available
+            if chapter.cover_image:
+                # Create the media:content element for the image
+                media_content = ET.SubElement(item, 'media:content', {
+                    'url': request.url_root.rstrip('/') + url_for('static', filename=f'uploads/{chapter.cover_image}'),
+                    'medium': 'image',
+                    'type': 'image/jpeg' if chapter.cover_image.lower().endswith(('.jpg', '.jpeg')) else 'image/png'
+                })
+                
+                # Add media:title
+                media_title = ET.SubElement(media_content, 'media:title')
+                media_title.text = f"Cover image for Chapter {chapter.sequence}: {chapter.title}"
+                
+                # Add media:description
+                media_description = ET.SubElement(media_content, 'media:description')
+                media_description.text = f"Cover image for {chapter.title}"
+                
+                # Also include the image in the HTML description for RSS readers that don't support media namespace
+                img_html = f'<img src="{request.url_root.rstrip("/")}/static/uploads/{chapter.cover_image}" alt="Chapter cover" style="max-width:300px; margin-bottom:15px;"><br/>'
+            else:
+                img_html = ''
+            
+            # Add description with image
             item_description = ET.SubElement(item, 'description')
             if chapter.content:
                 content_preview = chapter.content[:200] + '...' if len(chapter.content) > 200 else chapter.content
-                item_description.text = content_preview
+                description_html = f"<![CDATA[{img_html}{content_preview}]]>"
             else:
-                item_description.text = "No preview available."
+                description_html = f"<![CDATA[{img_html}No preview available.]]>"
+                
+            # We need to set this as raw XML, not as text
+            item_description.text = description_html
+                
+            # Add enclosure for RSS readers that support it
+            if chapter.cover_image:
+                # Try to get the file size
+                try:
+                    cover_path = os.path.join(app.config['UPLOAD_FOLDER'], chapter.cover_image)
+                    file_size = os.path.getsize(cover_path) if os.path.exists(cover_path) else 0
+                except:
+                    file_size = 0
+                    
+                ET.SubElement(item, 'enclosure', {
+                    'url': request.url_root.rstrip('/') + url_for('static', filename=f'uploads/{chapter.cover_image}'),
+                    'length': str(file_size),
+                    'type': 'image/jpeg' if chapter.cover_image.lower().endswith(('.jpg', '.jpeg')) else 'image/png'
+                })
         
         # Convert to string
         xml_str = ET.tostring(rss, encoding='utf-8', method='xml')
