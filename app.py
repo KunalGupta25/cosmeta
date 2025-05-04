@@ -42,7 +42,7 @@ except Exception as e:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
-app.config['DEFAULT_COVER_IMAGE'] = 'default-cover.jpg'  # Default cover image name
+app.config['DEFAULT_COVER_IMAGE'] = 'default-cover.png'  # Default cover image name
 
 # Check if we're in a read-only environment (like Vercel)
 try:
