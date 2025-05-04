@@ -903,14 +903,13 @@ def rss_feed_xml():
         item_pubDate = ET.SubElement(item, 'pubDate')
         item_pubDate.text = chapter.created_at.strftime('%a, %d %b %Y %H:%M:%S GMT')
         
-        # Add author if available
-        if chapter.author:
-            item_author = ET.SubElement(item, 'author')
-            item_author.text = chapter.author.email if hasattr(chapter.author, 'email') else "author@cosmeta.com"
+        # Add author information
+        item_author = ET.SubElement(item, 'author')
+        item_author.text = "author@cosmeta.com"
         
         # Add description (short summary)
         item_description = ET.SubElement(item, 'description')
-        if chapter.summary:
+        if hasattr(chapter, 'summary') and chapter.summary:
             item_description.text = chapter.summary
         elif chapter.content:
             content_preview = chapter.content[:200] + '...' if len(chapter.content) > 200 else chapter.content
@@ -918,10 +917,14 @@ def rss_feed_xml():
         else:
             item_description.text = "No preview available."
         
-        # Add full content in CDATA section if available
+        # Add content summary
         if chapter.content:
+            # For simplicity, we'll just use a plain text version without CDATA
+            # since ElementTree doesn't handle CDATA sections well
             content_encoded = ET.SubElement(item, 'content:encoded')
-            content_encoded.text = ET.CDATA(chapter.content[:1000] + "..." if len(chapter.content) > 1000 else chapter.content)
+            content_text = chapter.content[:1000] + "..." if len(chapter.content) > 1000 else chapter.content
+            # Escape any HTML
+            content_encoded.text = content_text
     
     # Add XML declaration and convert to string
     xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
