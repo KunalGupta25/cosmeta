@@ -1,4 +1,5 @@
 import os
+import random
 from flask import Flask, render_template, redirect, url_for, flash, request, session, Response, make_response, send_from_directory
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from dotenv import load_dotenv
@@ -669,17 +670,29 @@ def new_chapter():
         if form.cover_image.data and form.cover_image.data.filename:
             try:
                 print(f"Uploading file: {form.cover_image.data.filename}")
-                filename = secure_filename(form.cover_image.data.filename)
+                
+                # Ensure upload directory exists
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                
+                # Get file extension
+                _, file_extension = os.path.splitext(form.cover_image.data.filename)
+                
+                # Create a unique filename
                 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-                filename = f"{timestamp}_{filename}"
+                random_suffix = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
+                filename = f"{timestamp}_{random_suffix}{file_extension.lower()}"
+                
+                # Save the file
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 print(f"Saving to: {filepath}")
+                
+                # Save the file
                 form.cover_image.data.save(filepath)
                 cover_image = filename
                 print(f"File saved successfully as: {cover_image}")
             except Exception as e:
-                print(f"Error uploading file: {e}")
-                flash(f"Error uploading file: {e}", "error")
+                print(f"Error uploading file: {str(e)}")
+                flash(f"Error uploading cover image: {str(e)}", "danger")
         
         chapter = Chapter(
             title=form.title.data,
@@ -725,17 +738,28 @@ def edit_chapter(chapter_id):
                         os.remove(old_image_path)
                         print(f"Deleted old image: {old_image_path}")
                 
-                filename = secure_filename(form.cover_image.data.filename)
+                # Ensure upload directory exists
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                
+                # Get file extension
+                _, file_extension = os.path.splitext(form.cover_image.data.filename)
+                
+                # Create a unique filename
                 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-                filename = f"{timestamp}_{filename}"
+                random_suffix = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
+                filename = f"{timestamp}_{random_suffix}{file_extension.lower()}"
+                
+                # Save the file
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 print(f"Saving to: {filepath}")
+                
+                # Save the file
                 form.cover_image.data.save(filepath)
                 chapter.cover_image = filename
                 print(f"File saved successfully as: {filename}")
             except Exception as e:
-                print(f"Error uploading file: {e}")
-                flash(f"Error uploading file: {e}", "error")
+                print(f"Error uploading file: {str(e)}")
+                flash(f"Error uploading cover image: {str(e)}", "danger")
         
         db.session.commit()
         flash('Chapter has been updated!', 'success')
