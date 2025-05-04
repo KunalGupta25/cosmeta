@@ -789,6 +789,10 @@ def new_chapter():
                     flash(f"Using default cover image due to upload error: {str(e)}", "warning")
                     cover_image = app.config['DEFAULT_COVER_IMAGE']
         
+        # If no cover image was uploaded, use the default one
+        if not cover_image:
+            cover_image = app.config['DEFAULT_COVER_IMAGE']
+            
         chapter = Chapter(
             title=form.title.data,
             content=form.content.data,
