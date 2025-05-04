@@ -39,6 +39,11 @@
                 </div>
                 <span class="file-name">No file chosen</span>
             </div>
+            {% if config.READ_ONLY_ENV %}
+                <div class="form-info">
+                    <p><i class="fas fa-info-circle"></i> Note: The server is in read-only mode. A default cover image will be used.</p>
+                </div>
+            {% endif %}
             {% if form.cover_image.errors %}
                 <div class="form-errors">
                     {% for error in form.cover_image.errors %}

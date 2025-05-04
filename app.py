@@ -42,9 +42,24 @@ except Exception as e:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
+app.config['DEFAULT_COVER_IMAGE'] = 'default-cover.jpg'  # Default cover image name
 
-# Ensure upload directory exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# Check if we're in a read-only environment (like Vercel)
+try:
+    # Try to create a test file in the uploads directory
+    test_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'test_write.txt')
+    with open(test_file_path, 'w') as f:
+        f.write('test')
+    os.remove(test_file_path)
+    app.config['READ_ONLY_ENV'] = False
+    print("Running in a writable environment. File uploads enabled.")
+except Exception as e:
+    app.config['READ_ONLY_ENV'] = True
+    print(f"Running in a read-only environment. Using default cover images. Error: {e}")
+
+# Ensure upload directory exists if we're not in a read-only environment
+if not app.config['READ_ONLY_ENV']:
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize database
 db.init_app(app)
@@ -668,31 +683,40 @@ def new_chapter():
         # Handle cover image upload
         cover_image = None
         if form.cover_image.data and form.cover_image.data.filename:
-            try:
-                print(f"Uploading file: {form.cover_image.data.filename}")
-                
-                # Ensure upload directory exists
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                
-                # Get file extension
-                _, file_extension = os.path.splitext(form.cover_image.data.filename)
-                
-                # Create a unique filename
-                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-                random_suffix = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
-                filename = f"{timestamp}_{random_suffix}{file_extension.lower()}"
-                
-                # Save the file
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                print(f"Saving to: {filepath}")
-                
-                # Save the file
-                form.cover_image.data.save(filepath)
-                cover_image = filename
-                print(f"File saved successfully as: {cover_image}")
-            except Exception as e:
-                print(f"Error uploading file: {str(e)}")
-                flash(f"Error uploading cover image: {str(e)}", "danger")
+            # Check if we're in a read-only environment
+            if app.config['READ_ONLY_ENV']:
+                # Use default cover image in read-only environment
+                cover_image = app.config['DEFAULT_COVER_IMAGE']
+                print(f"Using default cover image: {cover_image} (read-only environment)")
+                flash("Using default cover image (server is in read-only mode)", "info")
+            else:
+                # Normal file upload in writable environment
+                try:
+                    print(f"Uploading file: {form.cover_image.data.filename}")
+                    
+                    # Ensure upload directory exists
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    
+                    # Get file extension
+                    _, file_extension = os.path.splitext(form.cover_image.data.filename)
+                    
+                    # Create a unique filename
+                    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                    random_suffix = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
+                    filename = f"{timestamp}_{random_suffix}{file_extension.lower()}"
+                    
+                    # Save the file
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    print(f"Saving to: {filepath}")
+                    
+                    # Save the file
+                    form.cover_image.data.save(filepath)
+                    cover_image = filename
+                    print(f"File saved successfully as: {cover_image}")
+                except Exception as e:
+                    print(f"Error uploading file: {str(e)}")
+                    flash(f"Using default cover image due to upload error: {str(e)}", "warning")
+                    cover_image = app.config['DEFAULT_COVER_IMAGE']
         
         chapter = Chapter(
             title=form.title.data,
@@ -728,38 +752,47 @@ def edit_chapter(chapter_id):
         
         # Handle cover image upload
         if form.cover_image.data and form.cover_image.data.filename:
-            try:
-                print(f"Uploading file in edit mode: {form.cover_image.data.filename}")
-                
-                # Delete old image if it exists
-                if chapter.cover_image:
-                    old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], chapter.cover_image)
-                    if os.path.exists(old_image_path):
-                        os.remove(old_image_path)
-                        print(f"Deleted old image: {old_image_path}")
-                
-                # Ensure upload directory exists
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                
-                # Get file extension
-                _, file_extension = os.path.splitext(form.cover_image.data.filename)
-                
-                # Create a unique filename
-                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-                random_suffix = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
-                filename = f"{timestamp}_{random_suffix}{file_extension.lower()}"
-                
-                # Save the file
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                print(f"Saving to: {filepath}")
-                
-                # Save the file
-                form.cover_image.data.save(filepath)
-                chapter.cover_image = filename
-                print(f"File saved successfully as: {filename}")
-            except Exception as e:
-                print(f"Error uploading file: {str(e)}")
-                flash(f"Error uploading cover image: {str(e)}", "danger")
+            # Check if we're in a read-only environment
+            if app.config['READ_ONLY_ENV']:
+                # Use default cover image in read-only environment
+                chapter.cover_image = app.config['DEFAULT_COVER_IMAGE']
+                print(f"Using default cover image: {app.config['DEFAULT_COVER_IMAGE']} (read-only environment)")
+                flash("Using default cover image (server is in read-only mode)", "info")
+            else:
+                # Normal file upload in writable environment
+                try:
+                    print(f"Uploading file in edit mode: {form.cover_image.data.filename}")
+                    
+                    # Delete old image if it exists
+                    if chapter.cover_image and chapter.cover_image != app.config['DEFAULT_COVER_IMAGE']:
+                        old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], chapter.cover_image)
+                        if os.path.exists(old_image_path):
+                            os.remove(old_image_path)
+                            print(f"Deleted old image: {old_image_path}")
+                    
+                    # Ensure upload directory exists
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    
+                    # Get file extension
+                    _, file_extension = os.path.splitext(form.cover_image.data.filename)
+                    
+                    # Create a unique filename
+                    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                    random_suffix = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
+                    filename = f"{timestamp}_{random_suffix}{file_extension.lower()}"
+                    
+                    # Save the file
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    print(f"Saving to: {filepath}")
+                    
+                    # Save the file
+                    form.cover_image.data.save(filepath)
+                    chapter.cover_image = filename
+                    print(f"File saved successfully as: {filename}")
+                except Exception as e:
+                    print(f"Error uploading file: {str(e)}")
+                    flash(f"Using default cover image due to upload error: {str(e)}", "warning")
+                    chapter.cover_image = app.config['DEFAULT_COVER_IMAGE']
         
         db.session.commit()
         flash('Chapter has been updated!', 'success')
@@ -772,11 +805,17 @@ def edit_chapter(chapter_id):
 def delete_chapter(chapter_id):
     chapter = Chapter.query.get_or_404(chapter_id)
     
-    # Delete cover image if it exists
-    if chapter.cover_image:
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], chapter.cover_image)
-        if os.path.exists(image_path):
-            os.remove(image_path)
+    # Delete cover image if it exists and is not the default image
+    if chapter.cover_image and chapter.cover_image != app.config['DEFAULT_COVER_IMAGE']:
+        # Only try to delete if we're not in a read-only environment
+        if not app.config['READ_ONLY_ENV']:
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], chapter.cover_image)
+            if os.path.exists(image_path):
+                try:
+                    os.remove(image_path)
+                    print(f"Deleted image: {image_path}")
+                except Exception as e:
+                    print(f"Error deleting image: {str(e)}")
     
     # Delete associated reading progress and comments
     ReadingProgress.query.filter_by(chapter_id=chapter.id).delete()
