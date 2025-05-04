@@ -839,109 +839,91 @@ def feed_page():
 @app.route('/rss.xml')
 def rss_feed_xml():
     """
-    Generate an RSS feed in XML format for automation and feed readers.
+    Generate a simple RSS feed in XML format for automation and feed readers.
     This endpoint always returns XML regardless of the Accept header.
     """
-    # Get site settings
-    site_settings = SiteSettings.query.first()
-    site_name = site_settings.site_name if site_settings else "Cosmeta: Incarnate"
-    site_description = site_settings.site_description if site_settings else "A web novel platform"
-    
-    # Get the latest chapters
-    chapters = Chapter.query.order_by(Chapter.created_at.desc()).limit(20).all()
-    
-    # Create the RSS feed with proper namespaces
-    rss = ET.Element('rss', {
-        'version': '2.0',
-        'xmlns:atom': 'http://www.w3.org/2005/Atom',
-        'xmlns:content': 'http://purl.org/rss/1.0/modules/content/'
-    })
-    
-    channel = ET.SubElement(rss, 'channel')
-    
-    # Add atom:link for RSS autodiscovery
-    atom_link = ET.SubElement(channel, 'atom:link', {
-        'href': request.url_root.rstrip('/') + url_for('rss_feed_xml'),
-        'rel': 'self',
-        'type': 'application/rss+xml'
-    })
-    
-    # Add channel information
-    title = ET.SubElement(channel, 'title')
-    title.text = site_name
-    
-    link = ET.SubElement(channel, 'link')
-    link.text = request.url_root
-    
-    description = ET.SubElement(channel, 'description')
-    description.text = site_description
-    
-    language = ET.SubElement(channel, 'language')
-    language.text = 'en-us'
-    
-    lastBuildDate = ET.SubElement(channel, 'lastBuildDate')
-    lastBuildDate.text = datetime.now().strftime('%a, %d %b %Y %H:%M:%S GMT')
-    
-    # Add generator info
-    generator = ET.SubElement(channel, 'generator')
-    generator.text = f"{site_name} RSS Generator"
-    
-    # Add items (chapters)
-    for chapter in chapters:
-        item = ET.SubElement(channel, 'item')
+    try:
+        # Get site settings
+        site_settings = SiteSettings.query.first()
+        site_name = site_settings.site_name if site_settings else "Cosmeta: Incarnate"
+        site_description = site_settings.site_description if site_settings else "A web novel platform"
         
-        item_title = ET.SubElement(item, 'title')
-        item_title.text = f"Chapter {chapter.sequence}: {chapter.title}"
+        # Get the latest chapters
+        chapters = Chapter.query.order_by(Chapter.created_at.desc()).limit(20).all()
         
-        item_link = ET.SubElement(item, 'link')
-        item_link.text = request.url_root.rstrip('/') + url_for('chapter', chapter_id=chapter.id)
+        # Create a simple RSS feed without complex namespaces
+        rss = ET.Element('rss', {'version': '2.0'})
+        channel = ET.SubElement(rss, 'channel')
         
-        # Use isPermaLink attribute for guid
-        item_guid = ET.SubElement(item, 'guid', {'isPermaLink': 'true'})
-        item_guid.text = request.url_root.rstrip('/') + url_for('chapter', chapter_id=chapter.id)
+        # Add channel information
+        title = ET.SubElement(channel, 'title')
+        title.text = site_name
         
-        item_pubDate = ET.SubElement(item, 'pubDate')
-        item_pubDate.text = chapter.created_at.strftime('%a, %d %b %Y %H:%M:%S GMT')
+        link = ET.SubElement(channel, 'link')
+        link.text = request.url_root
         
-        # Add author information
-        item_author = ET.SubElement(item, 'author')
-        item_author.text = "author@cosmeta.com"
+        description = ET.SubElement(channel, 'description')
+        description.text = site_description
         
-        # Add description (short summary)
-        item_description = ET.SubElement(item, 'description')
-        if hasattr(chapter, 'summary') and chapter.summary:
-            item_description.text = chapter.summary
-        elif chapter.content:
-            content_preview = chapter.content[:200] + '...' if len(chapter.content) > 200 else chapter.content
-            item_description.text = content_preview
-        else:
-            item_description.text = "No preview available."
+        language = ET.SubElement(channel, 'language')
+        language.text = 'en-us'
         
-        # Add content summary
-        if chapter.content:
-            # For simplicity, we'll just use a plain text version without CDATA
-            # since ElementTree doesn't handle CDATA sections well
-            content_encoded = ET.SubElement(item, 'content:encoded')
-            content_text = chapter.content[:1000] + "..." if len(chapter.content) > 1000 else chapter.content
-            # Escape any HTML
-            content_encoded.text = content_text
-    
-    # Add XML declaration and convert to string
-    xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml_str = xml_declaration + ET.tostring(rss, encoding='unicode', method='xml')
-    
-    # Create response with proper headers
-    response = make_response(xml_str)
-    response.headers['Content-Type'] = 'application/rss+xml; charset=utf-8'
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    return response
+        # Add items (chapters)
+        for chapter in chapters:
+            item = ET.SubElement(channel, 'item')
+            
+            item_title = ET.SubElement(item, 'title')
+            item_title.text = f"Chapter {chapter.sequence}: {chapter.title}"
+            
+            item_link = ET.SubElement(item, 'link')
+            item_link.text = request.url_root.rstrip('/') + url_for('chapter', chapter_id=chapter.id)
+            
+            item_guid = ET.SubElement(item, 'guid')
+            item_guid.text = request.url_root.rstrip('/') + url_for('chapter', chapter_id=chapter.id)
+            
+            item_pubDate = ET.SubElement(item, 'pubDate')
+            item_pubDate.text = chapter.created_at.strftime('%a, %d %b %Y %H:%M:%S GMT')
+            
+            # Add description
+            item_description = ET.SubElement(item, 'description')
+            if chapter.content:
+                content_preview = chapter.content[:200] + '...' if len(chapter.content) > 200 else chapter.content
+                item_description.text = content_preview
+            else:
+                item_description.text = "No preview available."
+        
+        # Convert to string
+        xml_str = ET.tostring(rss, encoding='utf-8', method='xml')
+        
+        # Create response with proper headers
+        response = make_response(xml_str)
+        response.headers['Content-Type'] = 'application/rss+xml; charset=utf-8'
+        return response
+        
+    except Exception as e:
+        # Log the error
+        print(f"RSS Feed Error: {str(e)}")
+        # Return a simple error response
+        return f"Error generating RSS feed: {str(e)}", 500
 
 @app.route('/rss')
 def rss_feed():
     """
-    Legacy RSS feed route that redirects to the XML feed for automation compatibility
+    Legacy RSS feed route that serves both HTML and XML based on the request
     """
-    return redirect(url_for('rss_feed_xml'))
+    try:
+        # Check if the request accepts HTML (browser) or XML (feed reader)
+        best = request.accept_mimetypes.best_match(['text/html', 'application/rss+xml'])
+        if best == 'text/html' and request.accept_mimetypes[best] > request.accept_mimetypes['application/rss+xml']:
+            # Browser request - show HTML page
+            chapters = Chapter.query.order_by(Chapter.created_at.desc()).limit(20).all()
+            return render_template('feed.html', chapters=chapters)
+        else:
+            # RSS reader request - return XML
+            return redirect(url_for('rss_feed_xml'))
+    except Exception as e:
+        print(f"RSS Route Error: {str(e)}")
+        return f"Error processing RSS request: {str(e)}", 500
 
 # Error handlers
 @app.errorhandler(404)
