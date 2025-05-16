@@ -16,6 +16,16 @@ A Flask-based web application that allows users to read, upload, and manage e-no
 - **Discord Notifications**: Automatic Discord notifications when new chapters are published
 - **Responsive Design**: Works on desktop and mobile devices
 
+## Screenshots
+Homepage
+![image](https://github.com/user-attachments/assets/83c52065-f2d9-4f3e-a78b-3107c2f8a0ab)
+Admin Dashboard for user Management
+![image](https://github.com/user-attachments/assets/f3e71032-df4a-416f-80b1-1772aedc8db1)
+Author Dashboard for Chapter Management
+![image](https://github.com/user-attachments/assets/4dac3255-9d45-4c9d-b69b-ad18fd684774)
+
+
+
 ## Tech Stack
 
 - **Backend**: Flask (Python)
