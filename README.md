@@ -159,3 +159,6 @@ cosmeta-incarnate/
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support Me
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y6IPAOF)
