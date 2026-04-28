@@ -546,8 +546,8 @@ def admin_team():
             # Handle photo upload
             if 'photo' in request.files and request.files['photo'].filename:
                 try:
-                    # Delete old photo if it exists
-                    if team_member.photo:
+                    # Delete old photo only when filesystem is writable
+                    if not app.config['READ_ONLY_ENV'] and team_member.photo:
                         old_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], team_member.photo)
                         if os.path.exists(old_photo_path):
                             os.remove(old_photo_path)
@@ -556,9 +556,12 @@ def admin_team():
                     filename = secure_filename(file.filename)
                     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                     filename = f"{timestamp}_{filename}"
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(filepath)
-                    team_member.photo = filename
+                    if app.config['READ_ONLY_ENV']:
+                        flash("Server is in read-only mode. Photo upload skipped.", "info")
+                    else:
+                        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(filepath)
+                        team_member.photo = filename
                 except Exception as e:
                     flash(f"Error uploading photo: {e}", "error")
             
@@ -570,7 +573,7 @@ def admin_team():
             team_member = TeamMember.query.get_or_404(member_id)
             
             # Delete photo if it exists
-            if team_member.photo:
+            if not app.config['READ_ONLY_ENV'] and team_member.photo:
                 photo_path = os.path.join(app.config['UPLOAD_FOLDER'], team_member.photo)
                 if os.path.exists(photo_path):
                     os.remove(photo_path)
@@ -805,7 +808,13 @@ def new_chapter():
             cover_image=cover_image
         )
         db.session.add(chapter)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error creating chapter: {e}")
+            flash('Could not create chapter due to a database error. Please try again.', 'danger')
+            return render_template('chapter_form.html', form=form, title='New Chapter')
         
         # Send Discord notification for the new chapter
         base_url = request.url_root
@@ -818,6 +827,11 @@ def new_chapter():
             
         return redirect(url_for('dashboard'))
     
+    if request.method == 'POST' and form.errors:
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, 'danger')
+
     return render_template('chapter_form.html', form=form, title='New Chapter')
 
 @app.route('/dashboard/chapter/<int:chapter_id>/edit', methods=['GET', 'POST'])
@@ -874,10 +888,20 @@ def edit_chapter(chapter_id):
                     flash(f"Using default cover image due to upload error: {str(e)}", "warning")
                     chapter.cover_image = app.config['DEFAULT_COVER_IMAGE']
         
-        db.session.commit()
-        flash('Chapter has been updated!', 'success')
-        return redirect(url_for('dashboard'))
+        try:
+            db.session.commit()
+            flash('Chapter has been updated!', 'success')
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error updating chapter {chapter_id}: {e}")
+            flash('Could not update chapter due to a database error. Please try again.', 'danger')
     
+    if request.method == 'POST' and form.errors:
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, 'danger')
+
     return render_template('chapter_form.html', form=form, chapter=chapter, title='Edit Chapter')
 
 @app.route('/dashboard/chapter/<int:chapter_id>/delete', methods=['POST'])
