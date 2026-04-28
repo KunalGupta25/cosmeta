@@ -19,6 +19,7 @@ load_dotenv()
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-for-testing')
+is_vercel = os.getenv('VERCEL') == '1'
 
 # Try to connect to PostgreSQL using the DATABASE_URL from environment variables
 try:
@@ -38,24 +39,19 @@ try:
     print("Successfully connected to PostgreSQL database.")
 except Exception as e:
     print(f"Warning: Could not connect to PostgreSQL database. Using SQLite instead. Error: {e}")
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cosmeta.db'
+    # Relative SQLite paths resolve under Flask's instance dir, which is read-only on Vercel.
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/cosmeta.db' if is_vercel else 'sqlite:///cosmeta.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
 app.config['DEFAULT_COVER_IMAGE'] = 'default-cover.png'  # Default cover image name
 
-# Check if we're in a read-only environment (like Vercel)
-try:
-    # Try to create a test file in the uploads directory
-    test_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'test_write.txt')
-    with open(test_file_path, 'w') as f:
-        f.write('test')
-    os.remove(test_file_path)
-    app.config['READ_ONLY_ENV'] = False
+# On Vercel, deployment files are read-only (/var/task). Avoid write probes at import time.
+app.config['READ_ONLY_ENV'] = is_vercel
+if app.config['READ_ONLY_ENV']:
+    print("Running in a read-only environment. Using default cover images.")
+else:
     print("Running in a writable environment. File uploads enabled.")
-except Exception as e:
-    app.config['READ_ONLY_ENV'] = True
-    print(f"Running in a read-only environment. Using default cover images. Error: {e}")
 
 # Ensure upload directory exists if we're not in a read-only environment
 if not app.config['READ_ONLY_ENV']:
