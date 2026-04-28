@@ -60,6 +60,15 @@ if not app.config['READ_ONLY_ENV']:
 # Initialize database
 db.init_app(app)
 
+def initialize_database():
+    with app.app_context():
+        db.create_all()
+
+try:
+    initialize_database()
+except Exception as e:
+    print(f"Warning: Could not initialize database tables automatically. Error: {e}")
+
 # Initialize login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
