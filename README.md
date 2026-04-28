@@ -1,19 +1,29 @@
 # Cosmeta: Incarnate
 
-![Cosmeta logo](static/images/logo.png)
+<p align="center">
+   <img src="static/images/logo.png" alt="Cosmeta logo" width="180">
+</p>
 
-Cosmeta: Incarnate is a Flask-based e-novel platform for reading chapters, tracking progress, managing content, and running Discord-based role access for users, supporters, authors, and admins.
+<p align="center">
+   Cosmeta: Incarnate is a Flask-based e-novel platform for reading chapters, tracking progress, managing content, and running Discord-based role access for users, supporters, authors, and admins.
+</p>
 
 ## Screenshots
 
-Homepage
-![Homepage](https://github.com/user-attachments/assets/83c52065-f2d9-4f3e-a78b-3107c2f8a0ab)
+<p align="center"><strong>Homepage</strong></p>
+<p align="center">
+   <img src="https://github.com/user-attachments/assets/83c52065-f2d9-4f3e-a78b-3107c2f8a0ab" alt="Homepage screenshot" width="900">
+</p>
 
-Admin dashboard for user management
-![Admin dashboard](https://github.com/user-attachments/assets/f3e71032-df4a-416f-80b1-1772aedc8db1)
+<p align="center"><strong>Admin dashboard for user management</strong></p>
+<p align="center">
+   <img src="https://github.com/user-attachments/assets/f3e71032-df4a-416f-80b1-1772aedc8db1" alt="Admin dashboard screenshot" width="900">
+</p>
 
-Author dashboard for chapter management
-![Author dashboard](https://github.com/user-attachments/assets/4dac3255-9d45-4c9d-b69b-ad18fd684774)
+<p align="center"><strong>Author dashboard for chapter management</strong></p>
+<p align="center">
+   <img src="https://github.com/user-attachments/assets/4dac3255-9d45-4c9d-b69b-ad18fd684774" alt="Author dashboard screenshot" width="900">
+</p>
 
 ## Features
 
